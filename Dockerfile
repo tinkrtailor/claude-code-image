@@ -20,7 +20,5 @@ RUN gh --version
 
 # Install Claude Code (use CLAUDE_CODE_VERSION build-arg to bust cache)
 ARG CLAUDE_CODE_VERSION=unknown
-RUN which claude && ls -la $(which claude) && npm list -g @anthropic-ai/claude-code 2>&1 || true
-RUN npm uninstall -g @anthropic-ai/claude-code 2>/dev/null; rm -f $(which claude 2>/dev/null) 2>/dev/null; npm cache clean --force && npm install -g @anthropic-ai/claude-code@latest
+RUN npm install -g @anthropic-ai/claude-code@latest
 RUN claude --version
-
