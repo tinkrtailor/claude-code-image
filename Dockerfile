@@ -5,8 +5,9 @@ ENV BUN_INSTALL="/home/agent/.bun"
 ENV PATH="$BUN_INSTALL/bin:$PATH"
 RUN curl -fsSL https://bun.sh/install | bash && bun --version
 
-# Install pnpm
-RUN npm install -g pnpm && pnpm --version
+# Install pnpm. Pin v10 because current sandbox base is Node 20, while pnpm
+# 11 requires Node 22's node:sqlite module.
+RUN npm install -g pnpm@10.33.4 && pnpm --version
 
 # Install Foundry (forge, cast, anvil, chisel)
 RUN curl -L https://foundry.paradigm.xyz | bash
@@ -28,6 +29,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL "https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz" \
       | tar xz -C /usr/local --strip-components=1 \
     && sbt --version
+
+# Fix ownership of /tmp/.sbt created by root during sbt --version above
+RUN chown -R agent:agent /tmp/.sbt
 
 USER agent
 
@@ -68,3 +72,8 @@ RUN echo 'export BUN_INSTALL="/home/agent/.bun"' >> /home/agent/.bashrc \
 ARG CLAUDE_CODE_VERSION=unknown
 RUN npm install -g @anthropic-ai/claude-code@latest
 RUN claude --version
+
+# Install OpenCode (use OPENCODE_VERSION build-arg to bust cache)
+ARG OPENCODE_VERSION=unknown
+RUN npm install -g opencode-ai@latest
+RUN opencode --version
